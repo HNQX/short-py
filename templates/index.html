@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        .hidden {
+            visibility: hidden;
+        }
+
+        body {
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            line-height: 50px;
+            height: 100vh;
+            overflow: hidden;
+
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        body div {
+            margin: 0 0 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="max-height: 240px; overflow: auto;margin: 50px;">
+        {% for item in data %}
+        <li style="white-space: nowrap;overflow: hidden;" onclick="toEdit({{item}})">{{item.code}}： {{item.url}}</li>
+        {% endfor %}
+    </div>
+
+    <div>
+        <form method="post" action="/shorten">
+            <label>Enter the URL you want to shorten:</label>
+            <input type="text" name="url" required>
+            <br>
+            <label>Choose a custom shortened URL (optional):</label>
+            <input type="text" name="custom_url" required>
+            <input type="submit" value="Shorten">
+        </form>
+    </div>
+
+
+    <div>
+        <form class="hidden" id="f_edit" method="post" action="/edit">
+            <input type="text" name="url" required>
+            <input type="text" name="code" required>
+            <input type="text" name="previousCode" hidden>
+            <input type="submit" value="edit">
+        </form>
+    </div>
+    <div>
+        <button id="b_delete" class="hidden">delete</button>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script>
+        $('#b_delete').click(() => _request('/remove', { code: $('#f_edit>:nth-child(2)').val() }))
+
+        function toEdit(item) {
+            $('#f_edit').removeClass('hidden')
+            $('#b_delete').removeClass('hidden')
+            $('#f_edit>:nth-child(1)').val(item.url)
+            $('#f_edit>:nth-child(2)').val(item.code)
+            $('#f_edit>:nth-child(3)').val(item.code)
+        }
+
+        function _request(path, parameters, method = 'post') {
+            const form = document.createElement('form')
+            form.method = method
+            form.action = path
+            document.body.appendChild(form)
+
+            for (const key in parameters) {
+                const formField = document.createElement('input')
+                formField.type = 'hidden'
+                formField.name = key
+                formField.value = parameters[key]
+
+                form.appendChild(formField)
+            }
+            form.submit()
+        }
+    </script>
+</body>
+
+</html>
